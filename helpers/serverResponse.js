@@ -1,18 +1,17 @@
-
-export function succcessResponse(res,message,data=null){
-	res.status(200).json({
-		status:200,
-		error:false,
-		message,
-		data
-	})
+export function succcessResponse(res, message, data = null) {
+  res.status(200).json({
+    status: 200,
+    error: false,
+    message,
+    data,
+  });
 }
 
-export function errorResponse(res,statusCode,message){
-	res.status(statusCode).json({
-		status:statusCode,
-		error:true,
-		message,
-		data:null,
-	})
+export function errorResponse(res, statusCode, message) {
+  res.status(statusCode).json({
+    status: statusCode,
+    error: true,
+    message,
+    data: null,
+  });
 }
