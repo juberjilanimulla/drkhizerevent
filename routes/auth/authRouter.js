@@ -11,6 +11,8 @@ import {
 
 const authRouter = Router();
 
+authRouter.post("/signin", signinHandler);
+
 export default authRouter;
 
 async function signinHandler(req, res) {
