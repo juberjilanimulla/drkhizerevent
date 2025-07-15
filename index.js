@@ -1,12 +1,9 @@
 import express from "express";
 import config from "./config.js";
-import dbConnect from "./db";
+import dbConnect from "./db.js";
 
 const app = express();
 const port = config.PORT;
-
-
-
 
 //database connected successfully
 dbConnect()
