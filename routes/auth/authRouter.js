@@ -1,9 +1,13 @@
 import { Router } from "express";
 import {
   errorResponse,
-  succcessResponse,
+  successResponse,
 } from "../../helpers/serverResponse.js";
 import usermodel from "../../model/usermodel.js";
+import {
+  comparePassword,
+  generateAccessToken,
+} from "../../helpers/helperFunction.js";
 
 const authRouter = Router();
 
@@ -11,15 +15,31 @@ export default authRouter;
 
 async function signinHandler(req, res) {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return errorResponse(res, 400, "some params are missing");
+    const email = req.body.email;
+    const password = req.body.password;
+    const users = await usermodel.findOne({ email });
+
+    if (!users) {
+      return errorResponse(res, 404, "email not found");
     }
-    const user = await usermodel.findOne({ email });
-    if (!user) {
-      return errorResponse(res, 404, "user is not exist");
+    const comparepassword = comparePassword(password, users.password);
+
+    if (!comparepassword) {
+      return errorResponse(res, 404, "invalid password");
     }
-    
+
+    const userid = users._id.toString();
+
+    const { encoded_token, public_token } = generateAccessToken(
+      userid,
+      users.email,
+      users.role
+    );
+
+    successResponse(res, "SignIn successfully", {
+      encoded_token,
+      public_token,
+    });
   } catch (error) {
     console.log("error", error);
     errorResponse(res, 500, "internal server error");
