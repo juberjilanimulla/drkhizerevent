@@ -19,7 +19,7 @@ async function signinHandler(req, res) {
     if (!user) {
       return errorResponse(res, 404, "user is not exist");
     }
-    const 
+    
   } catch (error) {
     console.log("error", error);
     errorResponse(res, 500, "internal server error");
