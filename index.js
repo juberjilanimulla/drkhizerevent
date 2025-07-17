@@ -6,6 +6,8 @@ import { Admin } from "./helpers/helperFunction.js";
 import morgan from "morgan";
 import cors from "cors";
 import bodyParser from "body-parser";
+import adminRouter from "./routes/admin/adminRouter.js";
+import userRouter from "./routes/user/userRouter.js";
 
 const app = express();
 const port = config.PORT;
@@ -48,6 +50,8 @@ app.use((err, req, res, next) => {
 
 //routes
 app.use("/api/auth", authRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/user", userRouter);
 
 //database connected successfullys
 dbConnect()
