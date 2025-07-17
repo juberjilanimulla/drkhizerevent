@@ -37,14 +37,10 @@ async function getalldoctorHandler(req, res) {
       // const searchRegex = new RegExp(search.trim(), "i");
       const searchRegex = new RegExp("\\b" + search.trim(), "i");
       const searchConditions = [
-        { name: { $regex: searchRegex } },
+        { firstname: { $regex: searchRegex } },
+        { lastname: { $regex: searchRegex } },
         { email: { $regex: searchRegex } },
         { mobile: { $regex: searchRegex } },
-        { state: { $regex: searchRegex } },
-        { "service.servicename": { $regex: searchRegex } },
-        { "service.servicecost": { $regex: searchRegex } },
-        { "service.gstcost": { $regex: searchRegex } },
-        { "service.totalamount": { $regex: searchRegex } },
       ];
       query.$and.push({ $or: searchConditions });
     }
@@ -61,43 +57,12 @@ async function getalldoctorHandler(req, res) {
             acc[key] = sortby[key] === "asc" ? 1 : -1;
             return acc;
           }, {})
-        : { createdAt: -1 }; // Default sorting by most recent billing
+        : { createdAt: -1 }; // Default sorting by most recent doctors
 
-    const bills = await billingmodel.aggregate([
-      {
-        $lookup: {
-          from: "services",
-          localField: "serviceid",
-          foreignField: "_id",
-          as: "service",
-        },
-      },
-      {
-        $unwind: "$service",
-      },
-      {
-        $match: query,
-      },
-      {
-        $project: {
-          name: 1,
-          email: 1,
-          mobile: 1,
-          state: 1,
-          servicename: "$service.servicename",
-          servicecost: "$service.servicecost",
-          gstcost: "$service.gstcost",
-          totalamount: "$service.totalamount",
-          createdAt: 1,
-        },
-      },
-      { $sort: sortBy },
-      { $skip: skip },
-      { $limit: limit },
-    ]);
+       
 
     // Fetch total count for pagination
-    const totalCount = await billingmodel.countDocuments(query);
+    const totalCount = await doctormodel.countDocuments(query);
     const totalPages = Math.ceil(totalCount / limit);
 
     // Respond with data
