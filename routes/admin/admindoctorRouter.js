@@ -59,7 +59,11 @@ async function getalldoctorHandler(req, res) {
           }, {})
         : { createdAt: -1 }; // Default sorting by most recent doctors
 
-       
+    const doctor = await doctormodel
+      .find(query)
+      .sort(sortBy)
+      .skip(skip)
+      .limit(limit);
 
     // Fetch total count for pagination
     const totalCount = await doctormodel.countDocuments(query);
