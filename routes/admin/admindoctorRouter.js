@@ -70,7 +70,7 @@ async function getalldoctorHandler(req, res) {
     const totalPages = Math.ceil(totalCount / limit);
 
     // Respond with data
-    successResponse(res, "Success", { bills, totalPages });
+    successResponse(res, "Success", { doctor, totalPages });
   } catch (error) {
     console.log("error", error);
     errorResponse(res, 500, "internal server error");
