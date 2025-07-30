@@ -52,5 +52,5 @@ blogSchema.pre("findOneAndUpdate", function (next) {
   next();
 });
 
-const blogsmodel = model("blog", blogSchema);
-export default blogsmodel;
+const blogmodel = model("blog", blogSchema);
+export default blogmodel;
