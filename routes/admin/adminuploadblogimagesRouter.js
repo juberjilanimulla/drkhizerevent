@@ -43,50 +43,43 @@ const upload = multer({
     if (isImage) cb(null, true);
     else cb(new Error("Only image files are allowed"));
   },
-}).array("images", 10); // Support multiple files (max 10)
+}).single("blogimages"); // Support multiple files (max 10)
 
-const adminpropertyimages = Router();
+const adminblogimagesRouter = Router();
 
 // MULTI IMAGE UPLOAD
-adminpropertyimages.post("/:id", (req, res) => {
+adminblogimagesRouter.post("/:id", (req, res) => {
   upload(req, res, async (err) => {
     if (err) return errorResponse(res, 400, err.message || "Upload error");
-    if (!req.files || req.files.length === 0)
-      return errorResponse(res, 400, "No files uploaded");
+    if (!req.files) return errorResponse(res, 400, "No files uploaded");
 
     try {
-      const property = await propertymodel.findById(req.params.id);
-      if (!property) {
-        req.files.forEach((file) => fs.unlinkSync(file.path));
-        return errorResponse(res, 404, "Property not found");
+      const blog = await blogmodel.findById(req.params.id);
+      if (!blog) {
+        fs.unlinkSync(req.file.path);
+        return errorResponse(res, 404, "Blog not found");
       }
 
-      if (!Array.isArray(property.images)) {
-        property.images = [];
-      }
+      const fileContent = fs.readFileSync(file.path);
+      const fileName = `${req.params.id}-${Date.now()}${path.extname(
+        file.originalname
+      )}`;
+      const s3Key = `blogimages/${fileName}`;
 
-      for (const file of req.files) {
-        const fileContent = fs.readFileSync(file.path);
-        const fileName = `${req.params.id}-${Date.now()}${path.extname(
-          file.originalname
-        )}`;
-        const s3Key = `properties/${fileName}`;
+      const s3Res = await s3
+        .upload({
+          Bucket: process.env.AWS_S3_BUCKET,
+          Key: s3Key,
+          Body: fileContent,
+          ContentType: file.mimetype,
+        })
+        .promise();
 
-        const s3Res = await s3
-          .upload({
-            Bucket: process.env.AWS_S3_BUCKET,
-            Key: s3Key,
-            Body: fileContent,
-            ContentType: file.mimetype,
-          })
-          .promise();
+      blog.coverimage.push(s3Res.Location); // Add image URL
+      fs.unlinkSync(file.path); // Remove temp file
 
-        property.images.push(s3Res.Location); // Add image URL
-        fs.unlinkSync(file.path); // Remove temp file
-      }
-
-      await property.save();
-      return successResponse(res, "Images uploaded successfully", property);
+      await blog.save();
+      return successResponse(res, "Images uploaded successfully", blog);
     } catch (error) {
       console.error("Upload failed:", error.message);
       req.files.forEach((file) => {
@@ -97,4 +90,4 @@ adminpropertyimages.post("/:id", (req, res) => {
   });
 });
 
-export default adminpropertyimages;
+export default adminblogimagesRouter;

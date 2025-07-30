@@ -4,6 +4,7 @@ import {
   successResponse,
 } from "../../helpers/serverResponse.js";
 import blogmodel from "../../model/blogmodel.js";
+import adminblogimagesRouter from "./adminuploadblogimagesRouter.js";
 
 const adminblogRouter = Router();
 
@@ -12,6 +13,7 @@ adminblogRouter.post("/create", createblogsHandler);
 adminblogRouter.put("/update", updateblogsHandler);
 adminblogRouter.delete("/delete", deleteblogsHandler);
 adminblogRouter.post("/published", publishedapprovalHandler);
+adminblogRouter.use("/blogimage", adminblogimagesRouter);
 
 export default adminblogRouter;
 
