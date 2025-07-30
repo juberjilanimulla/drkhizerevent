@@ -10,7 +10,7 @@ import {
   successResponse,
   errorResponse,
 } from "../../helpers/serverResponse.js";
-import propertymodel from "../../model/propertymodel.js";
+import blogmodel from "../../model/blogmodel.js";
 
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
