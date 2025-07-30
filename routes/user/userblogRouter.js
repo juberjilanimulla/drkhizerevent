@@ -13,8 +13,10 @@ export default userblogRouter;
 
 async function getallblogHandler(req, res) {
   try {
-    const blog = await blogmodel.find().sort({ createdAt: -1 });
-    successResponse(res, "successfully", blog);
+    const blog = await blogmodel
+      .find({ published: true })
+      .sort({ createdAt: -1 });
+    successResponse(res, "successfully blog", blog);
   } catch (error) {
     console.log("error", error);
     errorResponse(res, 500, "internal server error");
