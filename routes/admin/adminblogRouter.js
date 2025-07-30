@@ -5,6 +5,15 @@ import {
 } from "../../helpers/serverResponse.js";
 import blogmodel from "../../model/blogmodel.js";
 import adminblogimagesRouter from "./adminuploadblogimagesRouter.js";
+import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
 
 const adminblogRouter = Router();
 
@@ -86,7 +95,6 @@ async function createblogsHandler(req, res) {
       metadescription,
       keywords,
       content,
-      published: true,
     };
     const blog = await blogmodel.create(parmas);
     successResponse(res, "successfully updated", blog);
@@ -99,6 +107,15 @@ async function createblogsHandler(req, res) {
 async function updateblogsHandler(req, res) {
   try {
     const { _id, ...updatedData } = req.body;
+    if (!_id) {
+      return errorResponse(res, 400, "Blog ID (_id) is required");
+    }
+
+    const existingBlog = await blogmodel.findById(_id);
+    if (!existingBlog) {
+      return errorResponse(res, 404, "Blog is not exist");
+    }
+
     const options = { new: true };
     if (
       !updatedData.title ||
@@ -122,35 +139,31 @@ async function deleteblogsHandler(req, res) {
   try {
     const { _id } = req.body;
     if (!_id) {
-      return errorResponse(res, 400, "some params are missing");
+      return errorResponse(res, 400, "blog ID (_id) is required");
     }
+
+    // Find property before deletion (to access images)
     const blog = await blogmodel.findById(_id);
     if (!blog) {
-      return errorResponse(res, 404, "blog id not found");
-    } // Extract public_id from Cloudinary URL
-    const imageUrl = blog.coverimage;
-    let publicId = null;
+      return errorResponse(res, 404, "blog not found");
+    }
 
-    if (imageUrl) {
-      const match = imageUrl.match(/\/v\d+\/(.+?)\.(jpg|jpeg|png|gif|webp)/);
-      if (match) {
-        publicId = match[1];
-      }
+    // Delete all images from S3
+    const s3Key = blog.coverimage?.split(".amazonaws.com/")[1];
+
+    if (s3Key) {
+      await s3.send(
+        new DeleteObjectCommand({
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Key: s3Key,
+        })
+      );
     }
 
     // Delete blog from DB
     await blogmodel.findByIdAndDelete(_id);
 
-    // Delete image from Cloudinary
-    if (publicId) {
-      try {
-        await cloudinary.uploader.destroy(publicId);
-        console.log("Cloudinary image deleted:", publicId);
-      } catch (cloudErr) {
-        // console.log("Cloudinary image deletion failed:", cloudErr.message);
-      }
-    }
-    successResponse(res, "successfully deleted");
+    return successResponse(res, "blog and associated images deleted");
   } catch (error) {
     console.log("error", error);
     errorResponse(res, 500, "internal server error");
@@ -159,11 +172,15 @@ async function deleteblogsHandler(req, res) {
 
 async function publishedapprovalHandler(req, res) {
   try {
-    const { publishedid } = req.query;
-    const { published } = req.body;
+    const { published, publishedid } = req.body;
 
     if (!publishedid) {
       return errorResponse(res, 400, "Blog ID is missing in URL params");
+    }
+
+    const existingBlog = await blogmodel.findById({ _id: publishedid });
+    if (!existingBlog) {
+      return errorResponse(res, 404, "Blog not found");
     }
 
     if (typeof published !== "boolean") {

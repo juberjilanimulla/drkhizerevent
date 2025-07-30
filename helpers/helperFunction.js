@@ -133,7 +133,6 @@ export async function Admin() {
         password: bcryptPassword("1234"),
       });
     } else {
-      console.log("admin already exist");
     }
   }
 }

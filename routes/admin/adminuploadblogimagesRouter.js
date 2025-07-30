@@ -2,7 +2,6 @@ import { Router } from "express";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
-import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
@@ -12,7 +11,7 @@ import {
 } from "../../helpers/serverResponse.js";
 import blogmodel from "../../model/blogmodel.js";
 
-dotenv.config();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -72,7 +71,6 @@ adminblogimagesRouter.post("/:id", (req, res) => {
         Key: s3Key,
         Body: fileContent,
         ContentType: req.file.mimetype,
-        ACL: "public-read",
       });
 
       await s3.send(uploadCommand);
