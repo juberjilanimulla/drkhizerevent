@@ -10,4 +10,5 @@ userRouter.use("/doctor", userdoctorRouter);
 userRouter.use("/blog", userblogRouter);
 userRouter.use("/contact", usercontactRouter);
 userRouter.use("/subcribe", usersubcribeRouter);
+
 export default userRouter;

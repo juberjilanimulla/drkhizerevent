@@ -1,6 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
-import fs from "fs";
+import fs, { createReadStream } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
@@ -10,7 +10,6 @@ import {
   errorResponse,
 } from "../../helpers/serverResponse.js";
 import blogmodel from "../../model/blogmodel.js";
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -60,7 +59,7 @@ adminblogimagesRouter.post("/:id", (req, res) => {
         return errorResponse(res, 404, "Blog not found");
       }
 
-      const fileContent = fs.readFileSync(req.file.path);
+      const fileStream = createReadStream(req.file.path);
       const fileName = `${req.params.id}-${Date.now()}${path.extname(
         req.file.originalname
       )}`;
@@ -69,7 +68,7 @@ adminblogimagesRouter.post("/:id", (req, res) => {
       const uploadCommand = new PutObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: s3Key,
-        Body: fileContent,
+        Body: fileStream,
         ContentType: req.file.mimetype,
       });
 
