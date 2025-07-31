@@ -16,7 +16,7 @@ const subcribeSchema = new Schema(
       default: Date.now(),
     },
   },
-  { timestamps: true, versionKey: true }
+  { timestamps: true, versionKey: false }
 );
 
 function currentLocalTimePlusOffset() {
