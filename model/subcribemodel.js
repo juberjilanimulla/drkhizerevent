@@ -10,7 +10,7 @@ const subcribeSchema = new Schema(
     },
     subcribe: {
       type: Boolean,
-      default: "",
+      default: true,
     },
     subcribedAt: {
       type: Date,
