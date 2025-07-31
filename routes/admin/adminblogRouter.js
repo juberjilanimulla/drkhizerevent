@@ -23,6 +23,7 @@ adminblogRouter.put("/update", updateblogsHandler);
 adminblogRouter.delete("/delete", deleteblogsHandler);
 adminblogRouter.post("/published", publishedapprovalHandler);
 adminblogRouter.use("/blogimage", adminblogimagesRouter);
+adminblogRouter.post("/imagedelete", deleteimageblogHandler);
 
 export default adminblogRouter;
 
@@ -209,5 +210,38 @@ async function publishedapprovalHandler(req, res) {
   } catch (error) {
     console.error("Error updating blog:", error);
     return errorResponse(res, 500, "Internal server error");
+  }
+}
+
+async function deleteimageblogHandler(req, res) {
+  try {
+    const { _id } = req.body;
+    if (!_id) {
+      return errorResponse(res, 400, "Blog ID (_id) is required");
+    }
+
+    const blog = await blogmodel.findById(_id);
+    if (!blog) {
+      return errorResponse(res, 404, "Blog not found");
+    }
+
+    const imageUrl = blog.coverimage;
+    const s3Key = imageUrl?.split(".amazonaws.com/")[1];
+
+    if (s3Key) {
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: s3Key,
+      });
+      await s3.send(deleteCommand);
+    }
+
+    blog.coverimage = ""; // Clear image reference from DB
+    await blog.save();
+
+    return successResponse(res, "Blog image deleted successfully", blog);
+  } catch (error) {
+    console.log("error", error);
+    errorResponse(res, 500, "internal server error");
   }
 }
