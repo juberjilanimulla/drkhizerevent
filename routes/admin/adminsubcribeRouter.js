@@ -79,9 +79,12 @@ async function deletesubcribeHandler(req, res) {
       return errorResponse(res, 400, "some params are missing");
     }
     const checkexist = await subcribemodel.findById({ _id: _id });
+
     if (!checkexist) {
       return errorResponse(res, 404, "subcribe id is not exist ");
     }
+    const subcribe = await subcribemodel.findByIdAndDelete(_id);
+
     successResponse(res, "success");
   } catch (error) {
     console.log("error", error);
