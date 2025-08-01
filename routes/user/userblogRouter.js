@@ -13,9 +13,19 @@ export default userblogRouter;
 
 async function getallblogHandler(req, res) {
   try {
-    const blog = await blogmodel
-      .find({ published: true })
-      .sort({ createdAt: -1 });
+    const blog = await blogmodel.aggregate([
+      {
+        $addFields: {
+          featuredOrder: { $cond: [{ $eq: ["$featured", true] }, 1, 0] },
+        },
+      },
+      {
+        $sort: {
+          featuredOrder: -1, // featured: true first
+          createdAt: -1, // then sort by newest
+        },
+      },
+    ]);
     successResponse(res, "successfully blog", blog);
   } catch (error) {
     console.log("error", error);
