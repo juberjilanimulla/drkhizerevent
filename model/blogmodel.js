@@ -5,6 +5,10 @@ const blogSchema = new Schema(
     title: {
       type: String,
     },
+    category: {
+      type: String,
+      default: "",
+    },
     metatitle: {
       type: String,
     },
@@ -23,9 +27,13 @@ const blogSchema = new Schema(
     },
     author: {
       type: String,
-      default: "Team Firstclusive",
+      default: "Dr. Khizer Junaidy",
     },
     published: {
+      type: Boolean,
+      default: false,
+    },
+    featured: {
       type: Boolean,
       default: false,
     },

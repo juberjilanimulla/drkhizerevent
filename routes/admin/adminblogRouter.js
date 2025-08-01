@@ -24,6 +24,7 @@ adminblogRouter.delete("/delete", deleteblogsHandler);
 adminblogRouter.post("/published", publishedapprovalHandler);
 adminblogRouter.use("/blogimage", adminblogimagesRouter);
 adminblogRouter.post("/imagedelete", deleteimageblogHandler);
+adminblogRouter.post("/feature", featuredblogHandler);
 
 export default adminblogRouter;
 
@@ -43,6 +44,7 @@ async function getallblogsHandler(req, res) {
         { metadescription: { $regex: searchRegex } },
         { keywords: { $regex: searchRegex } },
         { content: { $regex: searchRegex } },
+        { category: { $regex: searchRegex } },
       ];
     }
 
@@ -85,13 +87,28 @@ async function getallblogsHandler(req, res) {
 
 async function createblogsHandler(req, res) {
   try {
-    const { title, metatitle, metadescription, keywords, content, published } =
-      req.body;
-    if (!title || !metatitle || !metadescription || !keywords || !content) {
+    const {
+      title,
+      category,
+      metatitle,
+      metadescription,
+      keywords,
+      content,
+      published,
+    } = req.body;
+    if (
+      !title ||
+      !category ||
+      !metatitle ||
+      !metadescription ||
+      !keywords ||
+      !content
+    ) {
       return errorResponse(res, 400, "some params are missing");
     }
     const parmas = {
       title,
+      category,
       metatitle,
       metadescription,
       keywords,
@@ -120,6 +137,7 @@ async function updateblogsHandler(req, res) {
     const options = { new: true };
     if (
       !updatedData.title ||
+      !updatedData.category ||
       !updatedData.metatitle ||
       !updatedData.metadescription ||
       !updatedData.keywords ||
@@ -240,6 +258,41 @@ async function deleteimageblogHandler(req, res) {
     await blog.save();
 
     return successResponse(res, "Blog image deleted successfully", blog);
+  } catch (error) {
+    console.log("error", error);
+    errorResponse(res, 500, "internal server error");
+  }
+}
+
+async function featuredblogHandler(req, res) {
+  try {
+    const { featured, featuredid } = req.body;
+    if (!featuredid) {
+      return errorResponse(res, 400, "some params are missing");
+    }
+    const checkexist = await blogmodel.findById({ _id: featuredid });
+    if (!checkexist) {
+      return errorResponse(res, 404, "blog are not found");
+    }
+
+    if (typeof featured !== "boolean") {
+      return errorResponse(res, 400, "featured must be a boolean (true/false)");
+    }
+    const updatedBlog = await blogmodel.findByIdAndUpdate(
+      featuredid,
+      { featured },
+      { new: true }
+    );
+
+    if (!updatedBlog) {
+      return errorResponse(res, 404, "Blog not found");
+    }
+
+    return successResponse(
+      res,
+      "Blog featured status updated successfully",
+      updatedBlog
+    );
   } catch (error) {
     console.log("error", error);
     errorResponse(res, 500, "internal server error");
