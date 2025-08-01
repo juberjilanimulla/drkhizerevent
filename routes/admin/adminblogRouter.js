@@ -24,7 +24,7 @@ adminblogRouter.delete("/delete", deleteblogsHandler);
 adminblogRouter.post("/published", publishedapprovalHandler);
 adminblogRouter.use("/blogimage", adminblogimagesRouter);
 adminblogRouter.post("/imagedelete", deleteimageblogHandler);
-adminblogRouter.post("/feature", featuredblogHandler);
+adminblogRouter.post("/featured", featuredblogHandler);
 
 export default adminblogRouter;
 
