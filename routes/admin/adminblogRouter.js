@@ -267,16 +267,26 @@ async function deleteimageblogHandler(req, res) {
 async function featuredblogHandler(req, res) {
   try {
     const { featured, featuredid } = req.body;
+
     if (!featuredid) {
-      return errorResponse(res, 400, "some params are missing");
+      return errorResponse(res, 400, "Missing blog ID");
     }
-    const checkexist = await blogmodel.findById({ _id: featuredid });
-    if (!checkexist) {
-      return errorResponse(res, 404, "blog are not found");
+    const targetBlog = await blogmodel.findById(featuredid);
+    if (!targetBlog) {
+      return errorResponse(res, 404, "Blog not found");
     }
 
+    // Validate featured type
     if (typeof featured !== "boolean") {
-      return errorResponse(res, 400, "featured must be a boolean (true/false)");
+      return errorResponse(res, 400, "featured must be true or false");
+    }
+
+    if (featured === true) {
+      // Step 1: Set all other blogs to featured = false
+      await blogmodel.updateMany(
+        { featured: true },
+        { $set: { featured: false } }
+      );
     }
     const updatedBlog = await blogmodel.findByIdAndUpdate(
       featuredid,
@@ -284,13 +294,9 @@ async function featuredblogHandler(req, res) {
       { new: true }
     );
 
-    if (!updatedBlog) {
-      return errorResponse(res, 404, "Blog not found");
-    }
-
     return successResponse(
       res,
-      "Blog featured status updated successfully",
+      `Blog featured status set to ${featured}`,
       updatedBlog
     );
   } catch (error) {
