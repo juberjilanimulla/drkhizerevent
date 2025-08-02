@@ -130,7 +130,7 @@ export async function Admin() {
         email: email,
         role: "admin",
         mobile: 9966470788,
-        password: bcryptPassword("Khizer@0832"),
+        password: bcryptPassword("Drkhizer0832#*"),
       });
     } else {
     }
