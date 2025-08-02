@@ -9,6 +9,10 @@ const usercommentRouter = Router();
 
 export default usercommentRouter;
 
+usercommentRouter.post("/create", createcommentHandler);
+usercommentRouter.post("/", getcommentHandler);
+usercommentRouter.delete("/delete", deletecommentHandler);
+
 async function createcommentHandler(req, res) {
   try {
     const { blogid, name, email, mobile, message } = req.body;
