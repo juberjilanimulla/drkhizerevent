@@ -105,7 +105,7 @@ async function deletecommentHandler(req, res) {
     if (!comment) {
       return errorResponse(res, 404, "comment id not found");
     }
-    successResponse(res, "success", comment);
+    successResponse(res, "success");
   } catch (error) {
     console.log("error", error);
   }

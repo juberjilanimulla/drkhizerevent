@@ -121,11 +121,11 @@ async function publishedapprovalHandler(req, res) {
 
 async function deletecommitHandler(req, res) {
   try {
-    const { id } = req.body;
-    if (!id) {
+    const { _id } = req.body;
+    if (!_id) {
       return errorResponse(res, 400, "some params are missing");
     }
-    const comment = await commentmodel.findByIdAndDelete({ _id: id });
+    const comment = await commentmodel.findByIdAndDelete({ _id: _id });
     if (!comment) {
       return errorResponse(res, 404, "comment id not found");
     }
