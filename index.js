@@ -34,7 +34,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ extended: true, limit: "100mb" }));
-
+app.use(
+  cors({
+    origin: ["https://drkhizerjunaidy.com"],
+    credentials: true,
+  })
+);
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
     return res.status(400).json({ error: "Invalid JSON input" });
